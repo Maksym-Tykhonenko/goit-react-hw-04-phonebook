@@ -67,7 +67,7 @@ export function App() {
             <Form onSubmit={hendleFormSubmit} />
         </Section>
 
-        <Section title='Список контактов'>
+        {contacts.length > 0 && (<><Section title='Список контактов'>
             <Filter filtet={filter }
               handleFilterCont={handleFilterCont } />
 
@@ -75,7 +75,8 @@ export function App() {
               contact={renderContact()}
               deliteContact={delContact}
             />
-          </Section>
+          </Section></>) }
+        
       </Block>
     );
 

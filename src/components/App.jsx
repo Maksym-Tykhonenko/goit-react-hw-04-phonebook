@@ -1,4 +1,5 @@
-import {Component } from "react";
+import { useState, useEffect } from "react";
+import { nanoid } from 'nanoid';
 
 import { Section } from "./Section/Section";
 import { Form } from "./Form/Form";
@@ -7,87 +8,75 @@ import { ContactList } from "./ContactList/ContactList";
 
 import {Block } from "./App.styled";
 
-export class App extends Component {
-  state = {
-    contacts: [],
-    filter: ''
-  };
-
-  componentDidMount() {
-    const sevedContacts = localStorage.getItem('contacts')
-    if (sevedContacts !== null) {
-      this.setState({
-        contacts: JSON.parse(sevedContacts)
-      })
-    }
-  };
+export function App() {
+  const [contacts, setContacts] = useState(() =>
+    JSON.parse(window.localStorage.getItem('contacts') ?? ""));
   
-  componentDidUpdate(_, prevState) {
-    console.log( prevState);
-    console.log(this.props, this.state);
-    if (prevState.contact !== this.state.contacts) {
-      localStorage.setItem('contacts', JSON.stringify(this.state.contacts))
-    }
+  const [filter, setFilter] = useState("");
+
+  useEffect(() => {
+    console.log('вызвался useEffect' + Date.now())
+    window.localStorage.setItem('contacts', JSON.stringify(contacts));
+  },[contacts]);
+  
+  const checkContact = name => {
+    return contacts.map(contact => contact.name).includes(name);
   };
 
-  hendleFormSubmit = (newContact) => {
-
-    const { name: newName } = newContact;
-    const normalizedNewName = newName.toLowerCase();
-
-    !this.state.contacts.find(
-      ({ name: prevName }) => prevName.toLowerCase() === normalizedNewName
-    ) ?
-      this.setState(({ contacts }) => ({
-        contacts: [...contacts, newContact],
-      })) :
-      alert(`${newName} IS ALREADY IN CONTACT!!!`);
+  const hendleFormSubmit = ({name, number}) => {
+    //console.log(name);
+    //console.log(number);
+    if (checkContact(name)) {
+        alert(`${name} IS ALREADY IN CONTACT!!!`);
+        return;
+      };
+      const newContacts = {
+        name,
+        number,
+        id: nanoid(),
+      };
+      setContacts(contacts => [...contacts, newContacts]);
+      //console.log(newContacts);
   };
+  //console.log(contacts);
 
-  addToFilterContact = (e) => {
-    const { value } = e.currentTarget;
-    this.setState({
-      filter: value
-    })
-  };
-
-  renderContact = () => {
-    const { contacts, filter } = this.state;
+  const delContact = contId => {
+    //console.log(contId);
     
-    return contacts.filter(({ name }) =>
-      name.toLowerCase().includes(filter.toLowerCase()));
+    setContacts(contacts => contacts.filter(contact => contact.id !== contId));
+    //console.log(contacts);
   };
 
-  deliteContact = (contactId) => {
-    this.setState(prevState => ({
-      contacts: prevState.contacts.filter(contact=>contact.id !== contactId)
-    }))
+  const handleFilterCont = (e) => {
+   // console.log(e.target.value);
+    setFilter(e.target.value)
+   // console.log(filter)
+
   };
 
-  render() {
-    const { filter } = this.state;
-    const contacts = this.renderContact();
-   
-      return (
-        <Block>
-          <Section title='Форма'>
-             <Form onSubmit={this.hendleFormSubmit} />
-          </Section>
-          {this.state.contacts.length > 0 && 
-            (<>
-           <Section title='Список контактов'>
-              <Filter 
-                filter={filter } 
-                addToFilterContact={this.addToFilterContact} />
-              <ContactList 
-                contact={contacts}
-                deliteContact={this.deliteContact}
+  const renderContact = () => {
+    const normalizedFilter = filter.toLowerCase();
+
+    return contacts.filter(contact =>
+      contact.name.toLowerCase().includes(normalizedFilter));
+  };
+
+    return (
+      <Block>
+        <Section title='Форма'>
+            <Form onSubmit={hendleFormSubmit} />
+        </Section>
+
+        <Section title='Список контактов'>
+            <Filter filtet={filter }
+              handleFilterCont={handleFilterCont } />
+
+            <ContactList
+              contact={renderContact()}
+              deliteContact={delContact}
             />
-             </Section>
-            </>)
-          }
-        </Block>
-      );
-  };
-};
+          </Section>
+      </Block>
+    );
 
+};

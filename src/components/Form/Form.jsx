@@ -1,48 +1,45 @@
-import {Component } from "react";
-import { nanoid } from 'nanoid';
+import {useState } from "react";
 
 import {Btn, FormInputs} from './Form.styled';
 
-export class Form extends Component {
-    state = {
-        name: '',
-        number: '',
-        id: ''
-    }
-
-    handleInputContact = (e) => {
-        const {value, name}= e.currentTarget
-        this.setState({
-            [name]: value,
-            id: nanoid(10)
-        });
+export function Form({onSubmit}) {
+    const [name, setName] = useState('');
+    const [number, setNumber] = useState('');
+    
+    const handleInputContact = (e) => {
+        const { value, name } = e.currentTarget
+        //console.log(e.currentTarget.name)
+        switch (name) {
+            case 'name':
+                setName(value);
+                break;
+            case 'number':
+                setNumber(value);
+                break;
+            default:
+                return;
+         }
     };
 
-    handleAddContact = (e) => {
+    const handleAddContact = (e) => {
         e.preventDefault();
-        
-        const { onSubmit } = this.props;
-
-        onSubmit(this.state);
-
-        this.reset();
+        onSubmit({name, number});
+        reset();
     };
 
-    reset = () => {
-        this.setState({
-            name: '',
-            number: ''
-        })
+    const reset = () => {
+        setName('');
+        setNumber('');
     }
     
-    render() {
         return (
-         <FormInputs onSubmit={this.handleAddContact}>
+         
+         <FormInputs onSubmit={handleAddContact}>
             <label htmlFor="">Name
                     <input
                     placeholder="Name"
-                    value={this.state.name}
-                    onChange={this.handleInputContact}
+                    value={name}
+                    onChange={handleInputContact}
                     type="text"
                     name="name"
                     pattern="^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$"
@@ -53,8 +50,8 @@ export class Form extends Component {
             <label htmlFor="">Number
                     <input
                     placeholder="Number"
-                    value={this.state.number}
-                    onChange={this.handleInputContact}
+                    value={number}
+                    onChange={handleInputContact}
                     type="tel"
                     name="number" />
             </label>
@@ -63,6 +60,5 @@ export class Form extends Component {
               
          </FormInputs>
         );
-    };
 };
 

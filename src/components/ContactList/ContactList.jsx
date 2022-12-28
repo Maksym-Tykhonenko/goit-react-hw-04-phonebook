@@ -1,5 +1,6 @@
 import {List, ListItem, Name, Number, DelBtn} from './ContactList.styled';
-
+//
+// 
 export const ContactList = ({ contact, deliteContact }) => {
 
     return (
